@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "bencode.py>=4.1,<5",
-  "click>=8.2,<8.3",
+  "click>=8.2,<8.6",
   "defusedxml>=0.7.1,<1",
   "httpx>=0.27,<1",
   "typer>=0.20,<0.21",
