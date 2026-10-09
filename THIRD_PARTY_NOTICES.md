@@ -5,7 +5,7 @@ installers install those projects as separate distributions, and each distributi
 its own license. Their original license files must remain in the corresponding `.dist-info`
 directory when an installed environment is copied, bundled, or redistributed.
 
-The following runtime dependency families are expected by MagnetScout 0.2.1. Transitive versions
+The following runtime dependency families are expected by MagnetScout 0.2.2. Transitive versions
 can vary within the constraints selected by the installer, so redistributors must use the license
 files from the exact artifacts they ship as the authoritative terms.
 

@@ -10,6 +10,8 @@
 - Canonicalize and deduplicate by info hash before verification and ranking.
 - Add fixtures and tests for every provider. Tests must not depend on the live network.
 - Keep timeouts and concurrency bounded. Never log full peer IP addresses.
+- Send a versioned MagnetScout User-Agent, honor bounded `429` retries, and keep Internet Archive's
+  explicit-license filter enabled by default. Network privacy disclosures must remain accurate.
 - Do not add copyleft runtime dependencies. MagnetScout intentionally does not bundle a DHT
   backend; any future design requires a separate architecture and license review.
 - Keep `THIRD_PARTY_NOTICES.md` synchronized with the runtime dependency closure. Published wheels

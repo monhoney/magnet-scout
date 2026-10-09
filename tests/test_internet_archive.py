@@ -96,6 +96,23 @@ async def test_subject_and_license_filters_are_sent_to_advanced_search() -> None
     assert "licenseurl:*" in query
 
 
+async def test_explicit_license_filter_is_enabled_by_default() -> None:
+    query = ""
+    user_agent = ""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal query, user_agent
+        query = request.url.params["q"]
+        user_agent = request.headers["user-agent"]
+        return httpx.Response(200, json={"response": {"docs": []}})
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        await InternetArchiveProvider(client).search("public data", 5)
+
+    assert "licenseurl:*" in query
+    assert user_agent.startswith("MagnetScout/0.2.2 ")
+
+
 async def test_rejects_oversized_search_response() -> None:
     transport = httpx.MockTransport(lambda _: httpx.Response(200, content=b"x" * 11))
     async with httpx.AsyncClient(transport=transport) as client:

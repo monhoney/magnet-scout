@@ -7,11 +7,14 @@ from urllib.parse import quote
 
 import httpx
 
+from magnet_scout._version import __version__
 from magnet_scout.magnets import parse_magnet
 from magnet_scout.metainfo import enrich_from_torrent
 from magnet_scout.models import TorrentResult
-from magnet_scout.network import request_limited
+from magnet_scout.network import request_limited_with_retry
 from magnet_scout.torrent_metainfo import parse_torrent
+
+USER_AGENT = f"MagnetScout/{__version__} (+https://github.com/monhoney/magnet-scout)"
 
 
 class InternetArchiveProvider:
@@ -23,10 +26,10 @@ class InternetArchiveProvider:
     def __init__(
         self,
         client: httpx.AsyncClient,
-        concurrency: int = 5,
+        concurrency: int = 3,
         *,
         subjects: tuple[str, ...] = (),
-        license_only: bool = False,
+        license_only: bool = True,
         max_search_bytes: int = 2 * 1024 * 1024,
         max_metadata_bytes: int = 8 * 1024 * 1024,
         max_torrent_bytes: int = 2 * 1024 * 1024,
@@ -53,11 +56,12 @@ class InternetArchiveProvider:
             subjects = " OR ".join(f'subject:("{_escape(subject)}")' for subject in self.subjects)
             subject_clause = f" AND ({subjects})"
         license_clause = " AND licenseurl:*" if self.license_only else ""
-        response = await request_limited(
+        response = await request_limited_with_retry(
             self.client,
             "GET",
             self.search_url,
             max_bytes=self.max_search_bytes,
+            headers={"User-Agent": USER_AGENT},
             params={
                 "q": " AND ".join(term_clauses)
                 + ' AND format:"Archive BitTorrent"'
@@ -81,11 +85,12 @@ class InternetArchiveProvider:
         if not identifier:
             return None
         async with self._semaphore:
-            meta_response = await request_limited(
+            meta_response = await request_limited_with_retry(
                 self.client,
                 "GET",
                 self.metadata_url.format(identifier=identifier),
                 max_bytes=self.max_metadata_bytes,
+                headers={"User-Agent": USER_AGENT},
             )
             meta_response.raise_for_status()
             metadata = meta_response.json()
@@ -101,13 +106,14 @@ class InternetArchiveProvider:
             if not torrent_file or not torrent_file.get("name"):
                 return None
             filename = str(torrent_file["name"])
-            torrent_response = await request_limited(
+            torrent_response = await request_limited_with_retry(
                 self.client,
                 "GET",
                 self.download_url.format(
                     identifier=quote(identifier, safe=""), filename=quote(filename, safe="")
                 ),
                 max_bytes=self.max_torrent_bytes,
+                headers={"User-Agent": USER_AGENT},
             )
             torrent_response.raise_for_status()
             torrent = parse_torrent(torrent_response.content)

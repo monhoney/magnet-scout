@@ -54,9 +54,30 @@ applications must follow each operator's current terms, access policies, rate li
 trademark rules. Configured Torznab services are selected and administered by the user, who is
 responsible for the endpoint and any required account or API key.
 
+Internet Archive searches require explicit provider-supplied license metadata by default. Users
+may opt into unlicensed or unspecified records, but neither a `licenseurl` field nor its absence is
+a legal determination. MagnetScout identifies itself to HTTP services, bounds concurrency and
+response sizes, and performs limited `429` retries. These safeguards do not override a provider's
+right to change, restrict, or discontinue access.
+
 Provider responses are factual inputs, not bundled project assets. MagnetScout neither republishes
 provider databases nor grants permission to use a provider's name, branding, or service beyond
 the operator's terms.
+
+Names such as Internet Archive, Academic Torrents, Fedora, Red Hat, and Torznab are used only for
+identification. MagnetScout is not affiliated with or endorsed by those operators. Fedora is a
+trademark of Red Hat, Inc.; MagnetScout does not use provider logos.
+
+## Network privacy
+
+Internet Archive and configured Torznab services receive search queries. A Torznab API key is sent
+to the configured HTTPS service as a query parameter and may be retained in remote or intermediary
+logs. Academic Torrents and Fedora search matching happens locally after catalog retrieval.
+
+Optional verification contacts third-party trackers and web seeds listed in untrusted torrent
+metadata. Those services can observe the user's public IP address, request timestamp, and relevant
+info hash or URL. MagnetScout does not download payload pieces or log full peer addresses, but it
+cannot control remote logging. Verification remains an explicit opt-in operation.
 
 ## Search results and content
 

@@ -15,7 +15,7 @@ def default_providers(
     cache_root: Path | None = None,
     *,
     internet_archive_subjects: tuple[str, ...] = (),
-    internet_archive_license_only: bool = False,
+    internet_archive_license_only: bool = True,
 ) -> dict[str, SearchProvider]:
     root = cache_root or Path.home() / ".cache" / "magnet-scout"
     providers: list[SearchProvider] = [

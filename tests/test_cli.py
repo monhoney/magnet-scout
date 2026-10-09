@@ -37,12 +37,26 @@ def test_verify_is_forwarded_to_search(monkeypatch: object) -> None:
         ia_license_only: bool,
     ) -> SearchReport:
         seen["verify"] = verify
+        seen["ia_license_only"] = ia_license_only
         return SearchReport(query, [])
 
     monkeypatch.setattr(cli, "_run_search", fake_run_search)  # type: ignore[attr-defined]
     result = runner.invoke(app, ["search", "ubuntu", "--verify"])
     assert result.exit_code == 0
-    assert seen == {"verify": True}
+    assert seen == {"verify": True, "ia_license_only": True}
+
+
+def test_unlicensed_internet_archive_results_require_opt_in(monkeypatch: object) -> None:
+    seen: dict[str, bool] = {}
+
+    async def fake_run_search(*args: object, **kwargs: object) -> SearchReport:
+        seen["ia_license_only"] = bool(args[-1])
+        return SearchReport("ubuntu", [])
+
+    monkeypatch.setattr(cli, "_run_search", fake_run_search)  # type: ignore[attr-defined]
+    result = runner.invoke(app, ["search", "ubuntu", "--include-unlicensed-ia"])
+    assert result.exit_code == 0
+    assert seen == {"ia_license_only": False}
 
 
 def test_verified_seed_filter_requires_verification() -> None:

@@ -9,6 +9,6 @@ especially useful. The project does not consider provider downtime or stale swar
 security vulnerability.
 
 Every external response is subject to a decompressed byte limit before parsing. XML entity
-expansion and redirects are disabled, tracker and web-seed verification rejects non-public address
-ranges, and DHT discovery runs in a disposable process. These controls are security boundaries;
+expansion and redirects are disabled, and tracker and web-seed verification rejects non-public
+address ranges. MagnetScout does not include a DHT backend. These controls are security boundaries;
 changes to them require regression tests and updated architecture documentation.

@@ -18,7 +18,7 @@ def project_version() -> str:
 
 
 def package_version() -> str:
-    source = (ROOT / "src" / "magnet_scout" / "__init__.py").read_text()
+    source = (ROOT / "src" / "magnet_scout" / "_version.py").read_text()
     match = re.search(r'^__version__ = "([^"]+)"$', source, re.MULTILINE)
     if match is None:
         raise ValueError("magnet_scout.__version__ was not found")

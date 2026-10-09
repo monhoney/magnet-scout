@@ -11,6 +11,7 @@ from typing import Annotated
 import httpx
 import typer
 
+from magnet_scout._version import __version__
 from magnet_scout.cache import VerificationCache, cache_status, clear_cache
 from magnet_scout.config import ConfigError, TorznabSettings, load_torznab_settings
 from magnet_scout.models import SearchReport, TorrentResult
@@ -122,6 +123,9 @@ async def _run_search(
         limits=limits,
         follow_redirects=False,
         trust_env=False,
+        headers={
+            "User-Agent": (f"MagnetScout/{__version__} (+https://github.com/monhoney/magnet-scout)")
+        },
     ) as client:
         cache_root = _cache_root()
         registry = default_providers(
@@ -194,8 +198,11 @@ def search(
     ] = None,
     ia_license_only: Annotated[
         bool,
-        typer.Option(help="Require Internet Archive items with explicit license metadata"),
-    ] = False,
+        typer.Option(
+            "--ia-license-only/--include-unlicensed-ia",
+            help="Require explicit Internet Archive license metadata (default: enabled)",
+        ),
+    ] = True,
 ) -> None:
     """Search configured metadata providers."""
     if min_verified_seeders is not None and not verify:

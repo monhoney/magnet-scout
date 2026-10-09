@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2 - 2026-10-09
+
+- Identify automated requests with a versioned MagnetScout User-Agent.
+- Honor bounded Internet Archive `429` retries and reduce provider concurrency.
+- Require explicit Internet Archive license metadata by default, with an opt-out flag.
+- Document query and IP disclosure, provider terms, API-key handling, and trademarks.
+- Remove an obsolete DHT statement from the security policy.
+
 ## 0.2.1 - 2026-10-09
 
 - Include the project license and third-party notice inventory in published distributions.
