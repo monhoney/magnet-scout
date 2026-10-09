@@ -61,3 +61,7 @@ magnet-scout search example --provider my-index
 ```
 
 MagnetScout does not endorse or determine the legality of a configured Torznab source.
+
+Provider availability does not grant rights to a service, its metadata, or referenced content.
+See [Licensing and external services](licensing.md) for the separation between MagnetScout's MIT
+license and third-party terms.

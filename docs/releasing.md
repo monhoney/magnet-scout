@@ -37,7 +37,7 @@ python -m venv /tmp/magnet-scout-test
 /tmp/magnet-scout-test/bin/pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  magnet-scout==0.1.0
+  magnet-scout==X.Y.Z
 /tmp/magnet-scout-test/bin/magnet-scout --help
 ```
 

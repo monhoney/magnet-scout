@@ -21,7 +21,7 @@ MagnetScout requires Python 3.11 or newer.
 python -m pip install magnet-scout
 ```
 
-Until the first PyPI release, install from a checkout:
+To install the development version from a checkout:
 
 ```console
 python -m pip install -e .
@@ -62,7 +62,8 @@ print(magnet.canonical_uri)
 ```
 
 Provider integration uses the asynchronous `SearchProvider` protocol. See
-[docs/providers.md](docs/providers.md) for a complete example.
+[the provider documentation](https://github.com/monhoney/magnet-scout/blob/main/docs/providers.md)
+for a complete example.
 
 ## Evidence, not guarantees
 
@@ -73,16 +74,21 @@ Provider integration uses the asynchronous `SearchProvider` protocol. See
 - No check proves that a complete payload will remain available.
 
 The exact score and ranking rules are documented in
-[docs/health-scoring.md](docs/health-scoring.md).
+[the health-scoring documentation](https://github.com/monhoney/magnet-scout/blob/main/docs/health-scoring.md).
 
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [Providers](docs/providers.md)
-- [Health scoring](docs/health-scoring.md)
-- [Development](docs/development.md)
-- [Release process](docs/releasing.md)
+- [Architecture](https://github.com/monhoney/magnet-scout/blob/main/docs/architecture.md)
+- [Providers](https://github.com/monhoney/magnet-scout/blob/main/docs/providers.md)
+- [Health scoring](https://github.com/monhoney/magnet-scout/blob/main/docs/health-scoring.md)
+- [Development](https://github.com/monhoney/magnet-scout/blob/main/docs/development.md)
+- [Release process](https://github.com/monhoney/magnet-scout/blob/main/docs/releasing.md)
+- [Licensing and external services](https://github.com/monhoney/magnet-scout/blob/main/docs/licensing.md)
 
 ## License
 
 MagnetScout is released under the MIT License.
+
+That license covers MagnetScout's own source code. Dependencies, provider services, trademarks,
+and content referenced by search results retain their own licenses and terms. See the
+[licensing notes](https://github.com/monhoney/magnet-scout/blob/main/docs/licensing.md).
