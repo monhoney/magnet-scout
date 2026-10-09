@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "magnet-scout"
-version = "0.1.1"
+version = "0.2.0"
 description = "Discover and assess public BitTorrent metadata without downloading payloads"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -23,20 +23,18 @@ classifiers = [
   "Topic :: Internet",
 ]
 dependencies = [
-  "bencode.py>=4.1,<5",
   "click>=8.2,<8.3",
   "defusedxml>=0.7.1,<1",
   "httpx>=0.27,<1",
   "typer>=0.20,<0.21",
-  "torf>=4.3.1,<5",
 ]
 
 [project.optional-dependencies]
-dht = ["pythontorrentdht>=1.0.3,<2"]
 dev = [
   "bandit>=1.9,<2",
   "build>=1.2",
   "mypy>=1.15",
+  "packaging>=24",
   "pytest>=8.3",
   "pytest-asyncio>=0.25",
   "pip-audit>=2.10,<3",

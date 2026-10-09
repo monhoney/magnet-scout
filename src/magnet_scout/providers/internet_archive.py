@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import asyncio
-import io
 from collections.abc import Mapping
 from typing import Any
 from urllib.parse import quote
 
 import httpx
-from torf import Torrent
 
 from magnet_scout.magnets import parse_magnet
 from magnet_scout.metainfo import enrich_from_torrent
 from magnet_scout.models import TorrentResult
 from magnet_scout.network import request_limited
+from magnet_scout.torrent_metainfo import parse_torrent
 
 
 class InternetArchiveProvider:
@@ -111,8 +110,8 @@ class InternetArchiveProvider:
                 max_bytes=self.max_torrent_bytes,
             )
             torrent_response.raise_for_status()
-            torrent = Torrent.read_stream(io.BytesIO(torrent_response.content), validate=True)
-            parsed = parse_magnet(str(torrent.magnet()))
+            torrent = parse_torrent(torrent_response.content)
+            parsed = parse_magnet(torrent.magnet_uri())
             raw_size = doc.get("item_size")
             size = int(raw_size) if raw_size is not None else torrent.size
             title_value = doc.get("title") or metadata.get("metadata", {}).get("title")

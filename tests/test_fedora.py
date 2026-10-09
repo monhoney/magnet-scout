@@ -1,23 +1,24 @@
-from typing import Any
+import hashlib
 
 import httpx
 import pytest
 
-from magnet_scout.providers import fedora
 from magnet_scout.providers.fedora import FedoraProvider
+from tests._bencode import encode
 
 HASH = "0123456789abcdef0123456789abcdef01234567"
 
 
 @pytest.mark.asyncio
-async def test_searches_official_catalog_and_normalizes_torrent(monkeypatch: Any) -> None:
-    class FakeTorrent:
-        size = 2_000_000_000
-
-        def magnet(self) -> str:
-            return f"magnet:?xt=urn:btih:{HASH}&tr=https%3A%2F%2Ftracker.fedoraproject.org"
-
-    monkeypatch.setattr(fedora.Torrent, "read_stream", lambda stream, validate: FakeTorrent())
+async def test_searches_official_catalog_and_normalizes_torrent() -> None:
+    info = {
+        b"length": 2_000_000_000,
+        b"name": b"Fedora-Workstation.iso",
+        b"piece length": 16384,
+        b"pieces": b"x" * 20,
+    }
+    torrent_bytes = encode({b"announce": b"https://tracker.fedoraproject.org", b"info": info})
+    expected_hash = hashlib.sha1(encode(info), usedforsecurity=False).hexdigest()
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/torrents/":
@@ -29,14 +30,14 @@ async def test_searches_official_catalog_and_normalizes_torrent(monkeypatch: Any
                 ),
             )
         assert request.url.path.endswith("Fedora-Workstation-Live-x86_64-44.torrent")
-        return httpx.Response(200, content=b"small metainfo")
+        return httpx.Response(200, content=torrent_bytes)
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         results = await FedoraProvider(client).search("fedora workstation", 10)
 
     assert len(results) == 1
     assert results[0].title == "Fedora-Workstation-Live-x86_64-44"
-    assert results[0].info_hash == HASH
+    assert results[0].info_hash == expected_hash
     assert results[0].size_bytes == 2_000_000_000
     assert results[0].providers == ["fedora"]
     assert results[0].reported_seeders is None
@@ -44,19 +45,17 @@ async def test_searches_official_catalog_and_normalizes_torrent(monkeypatch: Any
 
 
 @pytest.mark.asyncio
-async def test_skips_malformed_torrent_without_failing_other_results(monkeypatch: Any) -> None:
-    class FakeTorrent:
-        size = 1
-
-        def magnet(self) -> str:
-            return f"magnet:?xt=urn:btih:{HASH}"
-
-    def read_stream(stream: Any, validate: bool) -> FakeTorrent:
-        if stream.read() == b"bad":
-            raise ValueError("malformed")
-        return FakeTorrent()
-
-    monkeypatch.setattr(fedora.Torrent, "read_stream", read_stream)
+async def test_skips_malformed_torrent_without_failing_other_results() -> None:
+    good = encode(
+        {
+            b"info": {
+                b"length": 1,
+                b"name": b"good.iso",
+                b"piece length": 16384,
+                b"pieces": b"x" * 20,
+            }
+        }
+    )
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/torrents/":
@@ -64,7 +63,7 @@ async def test_skips_malformed_torrent_without_failing_other_results(monkeypatch
                 200,
                 text='<a href="Fedora-Bad.torrent">bad</a><a href="Fedora-Good.torrent">good</a>',
             )
-        return httpx.Response(200, content=b"bad" if "Bad" in request.url.path else b"good")
+        return httpx.Response(200, content=b"bad" if "Bad" in request.url.path else good)
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         results = await FedoraProvider(client).search("fedora", 10)

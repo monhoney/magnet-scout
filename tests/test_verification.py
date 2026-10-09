@@ -2,7 +2,6 @@ import asyncio
 import struct
 from pathlib import Path
 
-import bencodepy
 import httpx
 import pytest
 
@@ -18,6 +17,7 @@ from magnet_scout.verification import (
     _parse_udp_connect,
     _parse_udp_scrape,
 )
+from tests._bencode import encode
 
 HASH = "0123456789abcdef0123456789abcdef01234567"
 
@@ -70,7 +70,7 @@ async def test_http_scrape_reads_seeders_without_announcing() -> None:
         assert b"info_hash=" in request.url.query
         return httpx.Response(
             200,
-            content=bencodepy.encode(
+            content=encode(
                 {
                     b"files": {
                         raw_hash: {
@@ -112,7 +112,7 @@ async def test_http_batch_scrape_groups_hashes_into_one_request() -> None:
             bytes.fromhex(HASH): {b"complete": 4, b"incomplete": 1},
             bytes.fromhex(second_hash): {b"complete": 9, b"incomplete": 2},
         }
-        return httpx.Response(200, content=bencodepy.encode({b"files": files}))
+        return httpx.Response(200, content=encode({b"files": files}))
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
         client = TrackerClient(http, allow_private_addresses=True)

@@ -32,8 +32,6 @@ def test_verify_is_forwarded_to_search(monkeypatch: object) -> None:
         verify: bool,
         cache_ttl: int,
         total_timeout: float,
-        dht: bool,
-        dht_timeout: float,
         torznab_settings: list[TorznabSettings],
         ia_subjects: list[str],
         ia_license_only: bool,
@@ -49,12 +47,6 @@ def test_verify_is_forwarded_to_search(monkeypatch: object) -> None:
 
 def test_verified_seed_filter_requires_verification() -> None:
     result = runner.invoke(app, ["search", "ubuntu", "--min-verified-seeders", "5"])
-    assert result.exit_code != 0
-    assert "requires --verify" in _all_output(result)
-
-
-def test_dht_requires_verification() -> None:
-    result = runner.invoke(app, ["search", "ubuntu", "--dht"])
     assert result.exit_code != 0
     assert "requires --verify" in _all_output(result)
 

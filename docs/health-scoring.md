@@ -38,11 +38,6 @@ does not guarantee that a complete, reachable copy can be downloaded.
 - `TRACKER_RESPONSIVE`: a valid scrape reported zero peers
 - `UNREACHABLE`: supported trackers were tried but none returned a valid scrape
 
-With `--dht`, `dht_peers` is an independently discovered peer count. A positive
-count can produce `VERIFIED_PEERS_ONLY`, but cannot prove that a complete seeder
-exists; only a tracker complete count can produce `VERIFIED_SEEDED`. A zero DHT
-count alone remains `UNKNOWN` because DHT observation is incomplete by nature.
-
 ## Ranking
 
 Sort keys, in order, are: verified status, health score, verified peers,

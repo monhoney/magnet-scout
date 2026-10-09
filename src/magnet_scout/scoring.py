@@ -20,21 +20,21 @@ def score_result(result: TorrentResult, now: datetime | None = None) -> TorrentR
     if result.reported_seeders:
         health += min(5.0, math.log2(result.reported_seeders + 1))
     freshness: float = 0.0
-    if result.last_checked and (result.tracker_responsive is True or (result.dht_peers or 0) > 0):
+    if result.last_checked and result.tracker_responsive is True:
         age = max(0.0, (now - result.last_checked.astimezone(UTC)).total_seconds())
         freshness = 5.0 if age <= 900 else max(0.0, 5.0 * (86400 - age) / 85500)
         health += freshness
     result.health_score = round(min(100.0, health), 1)
 
     confidence: float = 10 + min(45, len(result.providers) * 15)
-    confidence += 25 if result.tracker_responsive is True or (result.dht_peers or 0) > 0 else 0
+    confidence += 25 if result.tracker_responsive is True else 0
     confidence += 10 if result.tracker_responsive else 0
     confidence += 10 if result.web_seed_responsive else 0
     confidence += 5 if result.metadata_available else 0
     confidence += freshness * 2
     result.confidence_score = round(min(100.0, confidence), 1)
 
-    has_observation = result.tracker_responsive is True or (result.dht_peers or 0) > 0
+    has_observation = result.tracker_responsive is True
     if not result.verification_attempted or not has_observation:
         result.health = Health.UNKNOWN
     elif peers == 0 and result.tracker_responsive is not True:

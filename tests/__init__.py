@@ -1,0 +1,1 @@
+"""MagnetScout test suite."""

@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import asyncio
-import io
 import re
 from html.parser import HTMLParser
 from urllib.parse import unquote, urljoin
 
 import httpx
-from torf import Torrent
 
 from magnet_scout.magnets import parse_magnet
 from magnet_scout.metainfo import enrich_from_torrent
 from magnet_scout.models import TorrentResult
 from magnet_scout.network import ResponseTooLarge, request_limited
+from magnet_scout.torrent_metainfo import parse_torrent
 
 
 class _TorrentLinkParser(HTMLParser):
@@ -81,8 +80,8 @@ class FedoraProvider:
             except ResponseTooLarge as exc:
                 raise ValueError("Fedora torrent metainfo exceeds safety limit") from exc
             response.raise_for_status()
-            torrent = Torrent.read_stream(io.BytesIO(response.content), validate=True)
-        parsed = parse_magnet(str(torrent.magnet()))
+            torrent = parse_torrent(response.content)
+        parsed = parse_magnet(torrent.magnet_uri())
         result = TorrentResult(
             title=filename.removesuffix(".torrent"),
             magnet_uri=parsed.canonical_uri,

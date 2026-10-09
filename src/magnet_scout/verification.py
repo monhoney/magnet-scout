@@ -5,15 +5,15 @@ import ipaddress
 import secrets
 import socket
 import struct
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import quote_from_bytes, urlsplit, urlunsplit
 
-import bencodepy  # type: ignore[import-untyped]
 import httpx
-from bencodepy.exceptions import BencodeDecodeError  # type: ignore[import-untyped]
 
+from magnet_scout.bencode import BencodeError, decode
 from magnet_scout.cache import CachedVerification, VerificationCache
 from magnet_scout.models import TorrentResult, VerificationStatus
 from magnet_scout.network import ResponseTooLarge, request_limited
@@ -24,6 +24,17 @@ _SUPPORTED_SCHEMES = {"http", "https", "udp"}
 
 class TrackerError(RuntimeError):
     """A tracker could not provide a valid scrape observation."""
+
+
+class CompositeVerifier:
+    """Apply independent, metadata-only verifiers in a fixed order."""
+
+    def __init__(self, verifiers: Sequence[Any]) -> None:
+        self.verifiers = verifiers
+
+    async def verify_many(self, results: list[TorrentResult]) -> None:
+        for verifier in self.verifiers:
+            await verifier.verify_many(results)
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,7 +110,7 @@ class TrackerClient:
             raise TrackerError("tracker redirects are disabled")
         response.raise_for_status()
         try:
-            payload = bencodepy.decode(response.content)
+            payload = decode(response.content)
             if not isinstance(payload, dict):
                 raise TrackerError("tracker response is not a dictionary")
             failure = payload.get(b"failure reason") or payload.get(b"failure_reason")
@@ -109,11 +120,15 @@ class TrackerClient:
                 )
                 raise TrackerError(f"tracker rejected scrape: {message}")
             files = payload[b"files"]
+            if not isinstance(files, dict):
+                raise TrackerError("tracker files field is not a dictionary")
             observations: dict[str, TrackerObservation] = {}
             for info_hash, raw_hash in raw_hashes.items():
                 stats = files.get(raw_hash)
                 if stats is None:
                     continue
+                if not isinstance(stats, dict):
+                    raise TrackerError("tracker file statistics are not a dictionary")
                 observations[info_hash] = TrackerObservation(
                     tracker=tracker,
                     seeders=_nonnegative_int(stats[b"complete"]),
@@ -121,7 +136,7 @@ class TrackerClient:
                     completed=_optional_nonnegative_int(stats.get(b"downloaded")),
                 )
             return observations
-        except (BencodeDecodeError, KeyError, TypeError, ValueError) as exc:
+        except (BencodeError, KeyError, TypeError, ValueError) as exc:
             raise TrackerError("malformed HTTP scrape response") from exc
 
     async def _scrape_udp_many(

@@ -1,7 +1,7 @@
 # Development
 
 ```console
-python -m pip install -e '.[dev,dht]'
+python -m pip install -e '.[dev]'
 ruff check .
 mypy
 pytest
@@ -27,9 +27,7 @@ The SQLite verification cache defaults to
 `$XDG_CACHE_HOME/magnet-scout/verification.sqlite3` (or `~/.cache/...`). Tests
 must use `tmp_path`; never write tests into a developer's real cache.
 
-CI runs formatting, lint, strict typing, tests, and wheel/sdist builds on Python
-3.11–3.13. DHT tests use a stubbed count path plus a real parent-deadline test;
-they do not query the public DHT.
+CI runs formatting, lint, strict typing, tests, and wheel/sdist builds on Python 3.11–3.13.
 
 Torznab tests use XML fixtures and HTTPX mock transports. Never put real API
 keys in fixtures, command examples, exception messages, or snapshots.

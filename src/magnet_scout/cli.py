@@ -13,12 +13,16 @@ import typer
 
 from magnet_scout.cache import VerificationCache, cache_status, clear_cache
 from magnet_scout.config import ConfigError, TorznabSettings, load_torznab_settings
-from magnet_scout.dht import CompositeVerifier, DHTBatchVerifier, DHTUnavailable
 from magnet_scout.models import SearchReport, TorrentResult
 from magnet_scout.providers.registry import default_providers
 from magnet_scout.providers.torznab import TorznabProvider
 from magnet_scout.service import SearchService
-from magnet_scout.verification import TrackerClient, TrackerVerifier, WebSeedVerifier
+from magnet_scout.verification import (
+    CompositeVerifier,
+    TrackerClient,
+    TrackerVerifier,
+    WebSeedVerifier,
+)
 
 app = typer.Typer(no_args_is_help=True, help="Discover useful BitTorrent magnet metadata.")
 cache_app = typer.Typer(no_args_is_help=True, help="Inspect or clear local caches.")
@@ -56,7 +60,6 @@ def _human_result(index: int, result: TorrentResult) -> str:
         verified_seeds = "unavailable"
     else:
         verified_seeds = "not checked"
-    dht_peers = "not checked" if result.dht_peers is None else str(result.dht_peers)
     file_count = "unknown" if result.file_count is None else str(result.file_count)
     lines = [
         f"[{index}] {_safe_text(result.title)}",
@@ -65,7 +68,6 @@ def _human_result(index: int, result: TorrentResult) -> str:
         f"    Reported seeders:  {seeds}",
         f"    Verified seeders:  {verified_seeds}",
         f"    Verified peers:    {peers}",
-        f"    DHT peers:         {dht_peers}",
         f"    Verification:      {result.verification_status.value}",
         f"    Trackers:          {result.trackers_responded}/{result.trackers_checked} responded",
         f"    Web seeds:         {result.web_seeds_responded}/{result.web_seeds_checked} responded",
@@ -110,8 +112,6 @@ async def _run_search(
     verify: bool,
     cache_ttl: int,
     total_timeout: float,
-    dht: bool,
-    dht_timeout: float,
     torznab_settings: list[TorznabSettings],
     ia_subjects: list[str],
     ia_license_only: bool,
@@ -156,10 +156,7 @@ async def _run_search(
             concurrency=10,
             cache=cache,
         )
-        verifiers: list[object] = [tracker_verifier, WebSeedVerifier(client)]
-        if dht:
-            verifiers.append(DHTBatchVerifier(timeout=min(dht_timeout, total_timeout)))
-        verifier = CompositeVerifier(verifiers)
+        verifier = CompositeVerifier([tracker_verifier, WebSeedVerifier(client)])
         async with asyncio.timeout(total_timeout):
             return await SearchService(selected, verifier).search(
                 query,
@@ -188,10 +185,6 @@ def search(
         int, typer.Option(min=0, max=86400, help="Verification cache seconds; 0 disables")
     ] = 300,
     total_timeout: Annotated[float, typer.Option(min=1, max=300)] = 30.0,
-    dht: Annotated[
-        bool, typer.Option(help="Also observe peers through isolated BEP 5 DHT")
-    ] = False,
-    dht_timeout: Annotated[float, typer.Option(min=3, max=60)] = 15.0,
     config: Annotated[Path | None, typer.Option(help="TOML configuration path")] = None,
     torznab_url: Annotated[str | None, typer.Option(help="One-off Torznab endpoint")] = None,
     torznab_name: Annotated[str, typer.Option(help="Name for --torznab-url")] = "default",
@@ -207,8 +200,6 @@ def search(
     """Search configured metadata providers."""
     if min_verified_seeders is not None and not verify:
         raise typer.BadParameter("--min-verified-seeders requires --verify")
-    if dht and not verify:
-        raise typer.BadParameter("--dht requires --verify")
     config_root = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
     config_path = config or config_root / "magnet-scout" / "config.toml"
     try:
@@ -238,8 +229,6 @@ def search(
                 verify,
                 cache_ttl,
                 total_timeout,
-                dht,
-                dht_timeout,
                 settings,
                 ia_subject or [],
                 ia_license_only,
@@ -247,9 +236,6 @@ def search(
         )
     except TimeoutError:
         typer.echo(f"search exceeded the {total_timeout:g}s total timeout", err=True)
-        raise typer.Exit(1) from None
-    except DHTUnavailable as exc:
-        typer.echo(str(exc), err=True)
         raise typer.Exit(1) from None
     if json_output:
         typer.echo(

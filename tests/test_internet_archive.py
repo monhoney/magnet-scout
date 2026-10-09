@@ -1,30 +1,29 @@
-from typing import Any
+import hashlib
 
 import httpx
 import pytest
 
-from magnet_scout.providers import internet_archive
 from magnet_scout.providers.internet_archive import InternetArchiveProvider
+from tests._bencode import encode
 
 HASH = "0123456789abcdef0123456789abcdef01234567"
 
 
-async def test_search_builds_result_from_structured_metadata(monkeypatch: Any) -> None:
-    class FakeTorrent:
-        size = 1234
-
-        def magnet(self) -> str:
-            return (
-                f"magnet:?xt=urn:btih:{HASH}&xl=1234"
-                "&tr=https%3A%2F%2Ftracker.test%2Fa"
-                "&ws=https%3A%2F%2Farchive.test%2Fdownload%2F"
-            )
-
-    monkeypatch.setattr(
-        internet_archive.Torrent,
-        "read_stream",
-        lambda stream, validate: FakeTorrent(),
+async def test_search_builds_result_from_structured_metadata() -> None:
+    info = {
+        b"length": 1234,
+        b"name": b"public-linux.img",
+        b"piece length": 16384,
+        b"pieces": b"x" * 20,
+    }
+    torrent_bytes = encode(
+        {
+            b"announce": b"https://tracker.test/a",
+            b"info": info,
+            b"url-list": b"https://archive.test/download/",
+        }
     )
+    expected_hash = hashlib.sha1(encode(info), usedforsecurity=False).hexdigest()
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/advancedsearch.php":
@@ -55,14 +54,14 @@ async def test_search_builds_result_from_structured_metadata(monkeypatch: Any) -
                 },
             )
         if request.url.path == "/download/public-linux/public-linux_archive.torrent":
-            return httpx.Response(200, content=b"torrent metainfo fixture")
+            return httpx.Response(200, content=torrent_bytes)
         return httpx.Response(404)
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         results = await InternetArchiveProvider(client).search("linux", 5)
 
     assert len(results) == 1
-    assert results[0].info_hash == HASH
+    assert results[0].info_hash == expected_hash
     assert results[0].providers == ["internet-archive"]
     assert results[0].size_bytes == 1234
     assert results[0].reported_seeders is None

@@ -60,8 +60,6 @@ class TorrentResult:
     web_seeds_checked: int = 0
     web_seeds_responded: int = 0
     web_seed_responsive: bool | None = None
-    dht_attempted: bool = False
-    dht_peers: int | None = None
     metadata_available: bool | None = None
     health_score: float = 0.0
     confidence_score: float = 0.0

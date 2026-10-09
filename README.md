@@ -27,12 +27,6 @@ To install the development version from a checkout:
 python -m pip install -e .
 ```
 
-Optional DHT peer discovery is installed separately:
-
-```console
-python -m pip install 'magnet-scout[dht]'
-```
-
 ## CLI
 
 ```console
@@ -48,8 +42,7 @@ The default providers are Internet Archive, Academic Torrents, and Fedora. Provi
 reported independently, so one unavailable source does not discard results from the others.
 
 `--verify` performs bounded tracker and web-seed observations without requesting payload pieces.
-`--dht` adds optional, process-isolated peer discovery. A provider's reported seeder count remains
-separate from independently observed values.
+A provider's reported seeder count remains separate from independently observed tracker values.
 
 ## Python API
 
@@ -69,7 +62,6 @@ for a complete example.
 
 - `reported_seeders` is untrusted metadata supplied by a provider.
 - `verified_seeders` is a recent tracker observation when the tracker supports scraping.
-- `dht_peers` counts peer endpoints discovered during a bounded lookup; addresses are discarded.
 - `UNKNOWN` means there was not enough independent evidence. It does not mean dead.
 - No check proves that a complete payload will remain available.
 

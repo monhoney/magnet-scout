@@ -7,15 +7,30 @@ referenced by a search result.
 ## Python dependencies
 
 Runtime dependencies are installed as separate distributions and remain under their respective
-licenses. In particular, `torf` declares GPL-3.0-or-later and `bencode.py` declares the BitTorrent
-Open Source License. Other direct and transitive dependencies also retain their own notices and
+licenses. MagnetScout 0.2.0 removed `torf`, `bencode.py`, and the optional
+`pythontorrentdht` backend, eliminating its declared GPL and BitTorrent Open Source License runtime
+dependencies. No installed runtime distribution currently declares GPL or AGPL. Direct
+dependencies use MIT, BSD, or PSF-family licenses; the transitive certificate bundle `certifi`
+declares MPL-2.0, a file-level weak-copyleft license. All packages retain their own notices and
 conditions. Anyone redistributing an environment, container, executable bundle, or modified
 dependency must review and satisfy the licenses of everything they distribute; MagnetScout's MIT
 license does not replace those terms.
 
 MagnetScout does not vendor dependency source code. Dependency names and version constraints are
 listed in `pyproject.toml`; installed license metadata can be audited as part of a downstream
-distribution process.
+distribution process. The built-in bencode and torrent metainfo parsers are original MagnetScout
+code under the repository's MIT License and implement only the bounded read-only subset needed by
+tracker scrape responses and provider metadata.
+
+CI walks the installed runtime dependency closure and rejects metadata declaring GPL, AGPL, LGPL,
+or the BitTorrent Open Source License. This is a policy guard, not a substitute for reviewing
+license texts: package metadata can be incomplete, dependency versions can change within allowed
+ranges, and redistribution may impose notice obligations even for permissive dependencies.
+
+The runtime tree reviewed for 0.2.0 contained MIT, BSD, ISC, PSF, and MPL-2.0 components. In
+particular, `certifi` uses MPL-2.0. Ordinary unmodified use does not relicense MagnetScout, but a
+redistributor should preserve the license and notices shipped by every included distribution and
+review any modifications to MPL-covered files.
 
 ## Provider services
 
