@@ -49,11 +49,13 @@ and `magnet_scout.__version__`. The `pypi` environment approval is the final pub
 
 ## Checklist
 
-1. Review dependency licenses and security advisories.
+1. Review dependency licenses and security advisories. Update `THIRD_PARTY_NOTICES.md` whenever
+   the runtime dependency closure changes.
 2. Update the version in `pyproject.toml` and `src/magnet_scout/__init__.py`.
 3. Move relevant `CHANGELOG.md` entries into a dated release section.
 4. Run `ruff format --check .`, `ruff check .`, `mypy`, and `pytest`.
-5. Run `python -m build` and `python -m twine check dist/*`.
+5. Run `python -m build`, `python scripts/check_distribution_notices.py dist/*`, and
+   `python -m twine check dist/*`.
 6. Install the wheel in a fresh virtual environment and run CLI smoke tests.
 7. Run `python scripts/check_release.py --tag vX.Y.Z`.
 8. Test the exact version through TestPyPI.

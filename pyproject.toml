@@ -4,11 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "magnet-scout"
-version = "0.2.0"
+version = "0.2.1"
 description = "Discover and assess public BitTorrent metadata without downloading payloads"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 authors = [{name = "MagnetScout contributors"}]
 keywords = ["bittorrent", "torrent", "magnet", "infohash", "tracker", "metadata"]
 classifiers = [

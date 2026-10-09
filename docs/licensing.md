@@ -32,6 +32,20 @@ particular, `certifi` uses MPL-2.0. Ordinary unmodified use does not relicense M
 redistributor should preserve the license and notices shipped by every included distribution and
 review any modifications to MPL-covered files.
 
+Published MagnetScout distributions include both the project's `LICENSE` and
+`THIRD_PARTY_NOTICES.md`. The latter records the expected runtime dependency families and their
+license families. It is not a substitute for the exact license files installed with dependencies.
+CI therefore also checks that every distribution in the resolved runtime dependency closure ships
+at least one recognizable license or notice file. A downstream bundle must retain those original
+files, normally found in each package's `.dist-info` directory.
+
+MagnetScout's wheel and source distribution do not bundle dependency packages or `certifi`'s CA
+bundle. Installing MagnetScout resolves them as separate distributions. If a downstream product
+copies those files into a container, executable, appliance image, or other combined delivery, that
+product's release process must collect and preserve the exact license files from the resolved
+artifacts. If it modifies an MPL-2.0-covered file, it must additionally meet the MPL-2.0 source and
+notice obligations that apply to that modification.
+
 ## Provider services
 
 The built-in adapters access public metadata endpoints operated by Internet Archive, Academic

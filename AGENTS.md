@@ -12,6 +12,9 @@
 - Keep timeouts and concurrency bounded. Never log full peer IP addresses.
 - Do not add copyleft runtime dependencies. MagnetScout intentionally does not bundle a DHT
   backend; any future design requires a separate architecture and license review.
+- Keep `THIRD_PARTY_NOTICES.md` synchronized with the runtime dependency closure. Published wheels
+  and source distributions must contain both `LICENSE` and `THIRD_PARTY_NOTICES.md`; CI must verify
+  that installed dependencies retain their own license or notice files.
 - Record architectural discoveries and scoring changes in `docs/`.
 - Commit messages must be in English and should read like natural, human-written summaries.
 - Run `ruff format --check .`, `ruff check .`, `mypy`, and `pytest` before handing off changes.

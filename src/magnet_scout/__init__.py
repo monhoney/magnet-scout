@@ -4,7 +4,7 @@ from magnet_scout.magnets import InvalidMagnet, ParsedMagnet, parse_magnet
 from magnet_scout.models import Health, SearchReport, TorrentResult, VerificationStatus
 from magnet_scout.service import SearchService, merge_results
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "Health",

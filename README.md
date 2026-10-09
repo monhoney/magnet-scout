@@ -83,4 +83,5 @@ MagnetScout is released under the MIT License.
 
 That license covers MagnetScout's own source code. Dependencies, provider services, trademarks,
 and content referenced by search results retain their own licenses and terms. See the
-[licensing notes](https://github.com/monhoney/magnet-scout/blob/main/docs/licensing.md).
+[licensing notes](https://github.com/monhoney/magnet-scout/blob/main/docs/licensing.md) and
+[third-party notices](https://github.com/monhoney/magnet-scout/blob/main/THIRD_PARTY_NOTICES.md).

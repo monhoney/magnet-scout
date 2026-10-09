@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - 2026-10-09
+
+- Include the project license and third-party notice inventory in published distributions.
+- Verify that every installed runtime distribution retains at least one license or notice file.
+- Document redistribution requirements for separately installed dependencies and MPL-2.0 files.
+
 ## 0.2.0 - 2026-10-09
 
 - Replace `torf` and `bencode.py` with a bounded, read-only MIT-licensed parser.
